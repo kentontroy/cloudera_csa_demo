@@ -1,3 +1,6 @@
+<img src="./images/cloudera_ssb_skillup.png" alt=""/><br>
+
+## Install Cloudera Streaming Analytics (CSA) via Docker Compose
 ```
 export CSA_DOCKER_HOST=204.236.149.139
 export CSA_DOCKER_COMPOSE=/Users/kdavis/Development/csa/docker-compose.yml
@@ -40,7 +43,7 @@ http:<CSA_DOCKER_HOST>:8000/
 Default Credentials: admin/admin
 
 ```
-
+## Install Go for use with Apache Beam and the Flink Runner
 ```
 export GOPATH=$HOME/go/pkg/mod/
 export GOROOT=/usr/local/go
