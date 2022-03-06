@@ -11,9 +11,9 @@ from typing import Tuple
 GEO = None
 
 class BokehGeoFigure:
-  def __init__(self, locations: str):
+  def __init__(self, states: str):
     self.counties = {
-      code: county for code, county in counties.items() if county["state"] in (locations)
+      code: county for code, county in counties.items() if county["state"] in (states)
     }
     county_xs = [county["lons"] for county in self.counties.values()]
     county_ys = [county["lats"] for county in self.counties.values()]
