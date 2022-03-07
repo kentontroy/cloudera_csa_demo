@@ -45,6 +45,14 @@ http:<CSA_DOCKER_HOST>:8000/
 Default Credentials: admin/admin
 
 ```
+
+## Run Kafka commands for topic maintenance
+```
+docker-compose exec kafka /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create \
+  --topic demo_hurricane_metrics --partitions 8
+
+```
+
 ## Install Go for use with Apache Beam and the Flink Runner
 ```
 export GOPATH=$HOME/go/pkg/mod/
