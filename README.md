@@ -66,6 +66,31 @@ docker-compose exec kafka /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-s
 
 ```
 
+# SQL Stream Builder (SSB) - 
+```
+
+Wizards in SSB can automate the creation of the DDL in Flink:
+
+CREATE TABLE `ssb`.`ssb_default`.`demo_hurricane_metrics` (
+  `state` VARCHAR(2147483647),
+  `county` VARCHAR(2147483647),
+  `hazard_metric` DOUBLE,
+  `eventTimestamp` TIMESTAMP(3) METADATA FROM 'timestamp',
+  WATERMARK FOR `eventTimestamp` AS `eventTimestamp` - INTERVAL '60' SECOND
+) COMMENT 'demo_hurricane_metrics'
+WITH (
+  'properties.bootstrap.servers' = 'kafka:9092',
+  'properties.auto.offset.reset' = 'earliest',
+  'connector' = 'kafka',
+  'properties.request.timeout.ms' = '120000',
+  'properties.transaction.timeout.ms' = '900000',
+  'format' = 'json',
+  'topic' = 'demo_hurricane_metrics',
+  'scan.startup.mode' = 'earliest-offset'
+)
+
+```
+
 ## Install Go for use with Apache Beam and the Flink Runner
 ```
 export GOPATH=$HOME/go/pkg/mod/
