@@ -48,6 +48,8 @@ Default Credentials: admin/admin
 
 ## Run Kafka commands for topic maintenance
 ```
+Create a topic:
+
 docker-compose exec kafka /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create \
   --topic demo_hurricane_metrics --partitions 8
 
@@ -60,14 +62,22 @@ cat /etc/hosts
 204.236.149.139 kafka
 ...
 
+Consume a topic:
 
 docker-compose exec kafka /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 \
   --from-beginning --topic demo_hurricane_metrics
+  
+Delete a topic:
+
+docker-compose exec kafka /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --delete \
+  --topic demo_hurricane_metrics 
 
 ```
 
 ## Use SQL Stream Builder (SSB) 
 ```
+Login to the browser-based Console at port 8000.
+
 Wizards in SSB can automate the creation of the DDL in Flink:
 
 CREATE TABLE `ssb`.`ssb_default`.`demo_hurricane_metrics` (
@@ -88,7 +98,27 @@ WITH (
   'scan.startup.mode' = 'earliest-offset'
 )
 
+Start a Kafka Consumer (i.e. the weather/hurricane simulator):
+
+bokeh serve --show controller.py
+
+Run a continuous query against the incoming, unbounded stream:
+
+SELECT * FROM demo_hurricane_metrics
+;
+
+Run a continuous query to aggregate (by AVG) data into 10-minute intervals
+
+SELECT AVG(CAST(hazard_metric AS numeric)) AS avg_hazard_metric,
+       CAST(TUMBLE_END(eventTimestamp, interval '10' minute) AS varchar) AS ts,
+       us_state, us_county
+FROM demo_hurricane_metrics
+GROUP BY us_state, county, TUMBLE(eventTimestamp, interval '10' minute) 
+;
+
 ```
+
+
 
 ## Install Go for use with Apache Beam and the Flink Runner
 ```
