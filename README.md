@@ -51,6 +51,19 @@ Default Credentials: admin/admin
 docker-compose exec kafka /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create \
   --topic demo_hurricane_metrics --partitions 8
 
+NOTE: if you're Kafka consumer is running on a node external to the Docker host, you have to resolve the DNS
+      name used by Docker -> kafka
+
+cat /etc/hosts
+...
+# For customer-facing tests
+204.236.149.139 kafka
+...
+
+
+docker-compose exec kafka /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 \
+  --from-beginning --topic demo_hurricane_metrics
+
 ```
 
 ## Install Go for use with Apache Beam and the Flink Runner
