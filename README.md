@@ -66,7 +66,7 @@ docker-compose exec kafka /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-s
 
 ```
 
-# SQL Stream Builder (SSB) - 
+## SQL Stream Builder (SSB) - 
 ```
 
 Wizards in SSB can automate the creation of the DDL in Flink:
