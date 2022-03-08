@@ -33,7 +33,7 @@ Inside the EC2 host, launch Docker instances
 docker info
 pip3 install docker-compose
 cd demo/dev/
-git clone https://github.com/kentontroy/cloudera-csa-demo
+git clone https://github.com/kentontroy/cloudera_csa_demo
 cd docker
 export CML_DEMO_HOME=${PWD}
 ./jupyter.sh
