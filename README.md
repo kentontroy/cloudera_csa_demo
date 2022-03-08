@@ -5,7 +5,6 @@
 ## Install Cloudera Streaming Analytics (CSA) via Docker Compose
 ```
 export CSA_DOCKER_HOST=204.236.149.139
-export CSA_DOCKER_COMPOSE=/Users/kdavis/Development/csa/docker-compose.yml
 export PEM_FILE=${HOME}/Documents/Demos/creds/kdavis_pse_daily.pem
 
 ssh -i ${PEM_FILE} ec2-user@${CSA_DOCKER_HOST}
@@ -16,18 +15,21 @@ sudo yum install -y jq
 sudo service docker start
 sudo systemctl enable docker
 sudo usermod -a -G docker ec2-user
+mkdir -p demo/dev/
 sudo reboot
+
+scp -i ${PEM_FILE} ec2-user@${CSA_DOCKER_HOST}:/home/ec2-user/demo/dev/
 
 ssh -i ${PEM_FILE} ec2-user@${CSA_DOCKER_HOST}
 
 docker info
 pip3 install docker-compose
-mkdir -p demo/dev/docker
+cd demo/dev/
+git clone https://github.com/kentontroy/cloudera-csa-demo
+cd docker
+export CML_DEMO_HOST=${PWD}
+./jupyter.sh
 
-scp -i ${PEM_FILE} ${CSA_DOCKER_COMPOSE} ec2-user@${CSA_DOCKER_HOST}:/home/ec2-user/demo/dev/docker
-
-ssh -i ${PEM_FILE} ec2-user@${CSA_DOCKER_HOST}
-cd demo/dev/docker
 docker-compose up -d --scale flink-taskmanager=2
 
 docker images
