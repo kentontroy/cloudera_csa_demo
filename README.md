@@ -107,7 +107,9 @@ Run a continuous query against the incoming, unbounded stream:
 
 SELECT * FROM demo_hurricane_metrics
 ;
-
+```
+## Build a Materialized View
+```
 Create a continuous query to aggregate (by AVG) data into 10-minute intervals
 
 SELECT AVG(CAST(hazard_metric AS numeric)) AS avg_hazard_metric,
@@ -136,7 +138,6 @@ curl http://localhost:18131/api/v1/query/5196/demo?key=245a51f6-2781-46b9-8db4-4
   },
   ......
 ]
-
 ```
 
 ## Install Go for use with Apache Beam and the Flink Runner
