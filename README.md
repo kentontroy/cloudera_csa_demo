@@ -12,6 +12,7 @@ ssh -i ${PEM_FILE} ec2-user@${CSA_DOCKER_HOST}
 
 sudo yum update -y
 sudo amazon-linux-extras install docker
+sudo yum install -y jq
 sudo service docker start
 sudo systemctl enable docker
 sudo usermod -a -G docker ec2-user
@@ -81,8 +82,8 @@ Login to the browser-based Console at port 8000.
 Wizards in SSB can automate the creation of the DDL in Flink:
 
 CREATE TABLE `ssb`.`ssb_default`.`demo_hurricane_metrics` (
-  `state` VARCHAR(2147483647),
-  `county` VARCHAR(2147483647),
+  `us_state` VARCHAR(2147483647),
+  `us_county` VARCHAR(2147483647),
   `hazard_metric` DOUBLE,
   `eventTimestamp` TIMESTAMP(3) METADATA FROM 'timestamp',
   WATERMARK FOR `eventTimestamp` AS `eventTimestamp` - INTERVAL '60' SECOND
@@ -107,18 +108,36 @@ Run a continuous query against the incoming, unbounded stream:
 SELECT * FROM demo_hurricane_metrics
 ;
 
-Run a continuous query to aggregate (by AVG) data into 10-minute intervals
+Create a continuous query to aggregate (by AVG) data into 10-minute intervals
 
 SELECT AVG(CAST(hazard_metric AS numeric)) AS avg_hazard_metric,
        CAST(TUMBLE_END(eventTimestamp, interval '10' minute) AS varchar) AS ts,
-       us_state, us_county
+       us_county || ', ' || us_state AS county 
 FROM demo_hurricane_metrics
-GROUP BY us_state, county, TUMBLE(eventTimestamp, interval '10' minute) 
-;
+GROUP BY us_state, us_county, TUMBLE(eventTimestamp, interval '10' minute) 
+; 
+
+Build a Materialized View from the query.
+
+SSB will create a REST endpoint (static or dynamic) with an embedded API key
+
+curl http://localhost:18131/api/v1/query/5196/demo?key=245a51f6-2781-46b9-8db4-42ee1e77c1e0 | jq
+
+[
+  {
+    "avg_hazard_metric": "21.192308",
+    "ts": "2022-03-08 00:30:00.000",
+    "county": "Grady, OK"
+  },
+  {
+    "avg_hazard_metric": "20.880000",
+    "ts": "2022-03-08 00:30:00.000",
+    "county": "Bell, TX"
+  },
+  ......
+]
 
 ```
-
-
 
 ## Install Go for use with Apache Beam and the Flink Runner
 ```
