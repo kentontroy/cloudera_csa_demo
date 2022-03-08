@@ -150,6 +150,21 @@ curl http://localhost:18131/api/v1/query/5196/demo?key=245a51f6-2781-46b9-8db4-4
 
 <img src="./images/cloudera_materialized_view.png" alt=""/><br>
 
+## Use a Jupyter notebook within Cloudera CML or an independent Docker container
+If the latter, in the EC2 host where a Jupyter container is running:
+```
+docker exec -it jupyter /bin/bash
+jupyter server list
+...
+http://c4580d480ec3:8888/?token=98e844b1b2d750210f034b4d69440d1ff393373afd123bd6 :: /home/jovyan
+...
+
+Browse to:
+http://204.236.149.139:8888/?token=98e844b1b2d750210f034b4d69440d1ff393373afd123bd6
+
+```
+
+
 ## Install Go for use with Apache Beam and the Flink Runner
 ```
 export GOPATH=$HOME/go/pkg/mod/
