@@ -11,7 +11,7 @@ export PEM_FILE=${HOME}/Documents/Demos/creds/kdavis_pse_daily.pem
 
 ssh -i ${PEM_FILE} ec2-user@${CSA_DOCKER_HOST}
 ```
-Inside the EC2 host
+Inside the EC2 host, configure environment and install dependneces
 ```
 sudo yum update -y
 sudo amazon-linux-extras install docker
@@ -21,11 +21,15 @@ sudo systemctl enable docker
 sudo usermod -a -G docker ec2-user
 mkdir -p demo/dev/
 sudo reboot
-
+```
+From Mac or Linux host, copy PEM file to EC2
+```
 scp -i ${PEM_FILE} ec2-user@${CSA_DOCKER_HOST}:/home/ec2-user/demo/dev/
 
 ssh -i ${PEM_FILE} ec2-user@${CSA_DOCKER_HOST}
-
+```
+Inside the EC2 host, launch Docker instances
+```
 docker info
 pip3 install docker-compose
 cd demo/dev/
