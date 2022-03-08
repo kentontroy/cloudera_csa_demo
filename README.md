@@ -140,6 +140,8 @@ curl http://localhost:18131/api/v1/query/5196/demo?key=245a51f6-2781-46b9-8db4-4
 ]
 ```
 
+<img src="./images/cloudera_materialized_view.png" alt=""/><br>
+
 ## Install Go for use with Apache Beam and the Flink Runner
 ```
 export GOPATH=$HOME/go/pkg/mod/
