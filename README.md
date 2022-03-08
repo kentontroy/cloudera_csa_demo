@@ -47,7 +47,6 @@ docker.repository.cloudera.com/csa/ssb-docker_postgresql   1.6.0.0-ce   ecd73b2f
 http:<CSA_DOCKER_HOST>:8000/
 
 Default Credentials: admin/admin
-
 ```
 
 ## Run Kafka commands for topic maintenance
