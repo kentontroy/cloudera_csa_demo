@@ -1,0 +1,12 @@
+conda create --name bokeh python=3.8
+
+conda activate bokeh
+
+conda install bokeh
+
+% which bokeh
+/Users/kdavis/opt/anaconda3/envs/bokeh/bin/bokeh
+
+bokeh sampledata
+
+bokeh serve --show controller.py

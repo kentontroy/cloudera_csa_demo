@@ -1,0 +1,23 @@
+CSA -> Empower Real time insights to detect and respond to critical events that deliver business outcomes
+
+High throughput, low latency
+Create a pipeline write results, materialize events to a databases
+Create dashboards
+
+https://docs.cloudera.com/csa/1.5.0/installation/topics/csa-installing-parcel.html
+
+Materialized Views are in synchronization with the mutating stream - they are updated by a primary key as 
+data flows through the system. The data is updated by a given key, and it represents the latest view of the 
+data by key.
+
+For example: vehicleID Z latest latitude and longitude is X and Y. As the vehicle moves, the latitude and 
+longitude for the vehicleID are updated . The primary key is defined at creation time and is immutable.
+
+Materialized Views can be created as mutating snapshots of the queried data result that is updated by a given 
+key. The data is always the latest representation of itself by key (analogous to a primary key in most RDBMS systems).
+
+You can query the Materialized Views using a GET request over REST, which returns a JSON response as 
+"Content-Type: application/json". The queries are not defined at query time. Rather, they are curated, saved, and 
+granted access through the Cloudera platform. You can configure a REST endpoint to query the Materialized View. 
+Multiple query conditions can be created to allow various ways to query the same data. This is sometimes referred to 
+as a 'pull query'.
