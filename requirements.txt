@@ -1,0 +1,4 @@
+bokeh
+shapely
+pandas
+confluent-kafka
