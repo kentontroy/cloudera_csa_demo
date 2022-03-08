@@ -64,8 +64,8 @@ Create a topic:
 docker-compose exec kafka /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create \
   --topic demo_hurricane_metrics --partitions 8
 ```
-<p>NOTE: if you're Kafka consumer is running on a node external to the Docker host, you have to resolve the DNS
-      name used by Docker -> kafka </p>
+NOTE: if you're Kafka consumer is running on a node external to the Docker host, you have to resolve the DNS <br>
+      name used by Docker -> kafka <br>
 From Mac or Linux host:
 ```
 cat /etc/hosts
