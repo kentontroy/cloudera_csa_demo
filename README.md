@@ -66,6 +66,7 @@ docker-compose exec kafka /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafk
 ```
 NOTE: if you're Kafka consumer is running on a node external to the Docker host, you have to resolve the DNS
       name used by Docker -> kafka
+From Mac or Linux host:
 ```
 cat /etc/hosts
 ...
