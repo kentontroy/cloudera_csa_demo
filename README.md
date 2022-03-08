@@ -41,8 +41,9 @@ docker.repository.cloudera.com/csa/ssb-docker_flink        1.6.0.0-ce   fe141952
 docker.repository.cloudera.com/csa/ssb-docker_zookeeper    1.6.0.0-ce   db44b3d523f9   2 months ago   441MB
 docker.repository.cloudera.com/csa/ssb-docker_kafka        1.6.0.0-ce   231ddba4d185   2 months ago   480MB
 docker.repository.cloudera.com/csa/ssb-docker_postgresql   1.6.0.0-ce   ecd73b2f255c   2 months ago   542MB
-
-Access the Streaming Console:
+```
+## Access the Streaming Console:
+```
 http:<CSA_DOCKER_HOST>:8000/
 
 Default Credentials: admin/admin
