@@ -62,7 +62,7 @@ cat /etc/hosts
 # For customer-facing tests
 204.236.149.139 kafka
 ...
-
+```
 Consume a topic:
 ```
 docker-compose exec kafka /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 \
