@@ -3,12 +3,16 @@
 <img src="./images/cloudera_ssb_skillup.png" alt=""/><br>
 
 ## Install Cloudera Streaming Analytics (CSA) via Docker Compose
+
+From Linux or Mac laptop/desktop:
 ```
 export CSA_DOCKER_HOST=204.236.149.139
 export PEM_FILE=${HOME}/Documents/Demos/creds/kdavis_pse_daily.pem
 
 ssh -i ${PEM_FILE} ec2-user@${CSA_DOCKER_HOST}
-
+```
+Inside the EC2 host
+```
 sudo yum update -y
 sudo amazon-linux-extras install docker
 sudo yum install -y jq
@@ -27,7 +31,7 @@ pip3 install docker-compose
 cd demo/dev/
 git clone https://github.com/kentontroy/cloudera-csa-demo
 cd docker
-export CML_DEMO_HOST=${PWD}
+export CML_DEMO_HOME=${PWD}
 ./jupyter.sh
 
 docker-compose up -d --scale flink-taskmanager=2
