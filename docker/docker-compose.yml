@@ -1,0 +1,129 @@
+################################################################################
+#
+# Copyright (c) 2019-2021 Cloudera, Inc. All rights reserved.
+#
+# This code is provided to you pursuant to your written agreement with Cloudera, which may be the terms of the
+# Affero General Public License version 3 (AGPLv3), or pursuant to a written agreement with a third party authorized
+# to distribute this code.  If you do not have a written agreement with Cloudera or with an authorized and
+# properly licensed third party, you do not have any rights to this code.
+#
+# If this code is provided to you under the terms of the AGPLv3:
+# (A) CLOUDERA PROVIDES THIS CODE TO YOU WITHOUT WARRANTIES OF ANY KIND;
+# (B) CLOUDERA DISCLAIMS ANY AND ALL EXPRESS AND IMPLIED WARRANTIES WITH RESPECT TO THIS CODE, INCLUDING BUT NOT
+# LIMITED TO IMPLIED WARRANTIES OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE;
+# (C) CLOUDERA IS NOT LIABLE TO YOU, AND WILL NOT DEFEND, INDEMNIFY, OR HOLD YOU HARMLESS FOR ANY CLAIMS ARISING
+# FROM OR RELATED TO THE CODE; AND
+# (D) WITH RESPECT TO YOUR EXERCISE OF ANY RIGHTS GRANTED TO YOU FOR THE CODE, CLOUDERA IS NOT LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, PUNITIVE OR CONSEQUENTIAL DAMAGES INCLUDING, BUT NOT LIMITED
+# TO, DAMAGES RELATED TO LOST REVENUE, LOST PROFITS, LOSS OF INCOME, LOSS OF BUSINESS ADVANTAGE OR
+# UNAVAILABILITY, OR LOSS OR CORRUPTION OF DATA.
+#
+################################################################################
+
+version: "2.1"
+services:
+  sqlio:
+    image: docker.repository.cloudera.com/csa/ssb-docker_sqlio:1.6.0.0-ce
+    ports:
+      - "18121:18121"
+    networks:
+      - ssb-net
+    healthcheck:
+        test: ["CMD", "curl", "-f", "sqlio:18121/internal/heartbeat"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+    volumes:
+      - ssb-volume:/persistent
+  snapper:
+    image: docker.repository.cloudera.com/csa/ssb-docker_snapper:1.6.0.0-ce
+    ports:
+      - "18131:18131"
+    networks:
+      - ssb-net
+    restart: on-failure
+  postgresql:
+    image: docker.repository.cloudera.com/csa/ssb-docker_postgresql:1.6.0.0-ce
+    ports:
+      - "5432:5432"
+    networks:
+      - ssb-net
+    volumes:
+      - pg-volume:/var/lib/postgresql
+  zookeeper:
+    image: docker.repository.cloudera.com/csa/ssb-docker_zookeeper:1.6.0.0-ce
+    ports:
+      - "2181:2181"
+    networks:
+      - ssb-net
+    volumes:
+      - zk-volume:/data
+    healthcheck:
+        test: bash -c '/usr/bin/test $$({ printf >&3 "ruok" && /usr/bin/cat <&3; } 3<>/dev/tcp/localhost/2181) == "imok"'
+        interval: 30s
+        timeout: 10s
+        retries: 5
+    restart: on-failure
+  kafka:
+    image: docker.repository.cloudera.com/csa/ssb-docker_kafka:1.6.0.0-ce
+    ports:
+      - "9092:9092"
+    networks:
+      - ssb-net
+    volumes:
+      - kf-volume:/data
+    healthcheck:
+        test: ["CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "localhost:9092"]
+        interval: 5s
+        timeout: 10s
+        retries: 30
+    restart: on-failure
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+  console:
+    image: docker.repository.cloudera.com/csa/ssb-docker_console:1.6.0.0-ce
+    restart: on-failure
+    ports:
+      - "18111:18111"
+      - "8000:8000"
+    networks:
+      - ssb-net
+    depends_on:
+      sqlio:
+        condition: service_healthy
+  flink-jobmanager:
+    image: docker.repository.cloudera.com/csa/ssb-docker_flink:1.6.0.0-ce
+    ports:
+      - "8081:8081"
+    entrypoint: /usr/bin/init-flink jobmanager
+    networks:
+      - ssb-net
+    volumes:
+      - flink-volume:/persistent
+    healthcheck:
+        test: ["CMD", "curl", "-f", "localhost:8081"]
+        interval: 5s
+        timeout: 10s
+        retries: 30
+  flink-taskmanager:
+    image: docker.repository.cloudera.com/csa/ssb-docker_flink:1.6.0.0-ce
+    entrypoint: /usr/bin/init-flink taskmanager
+    networks:
+      - ssb-net
+    volumes:
+      - flink-volume:/persistent
+    depends_on:
+      flink-jobmanager:
+        condition: service_healthy
+
+networks:
+  ssb-net:
+    driver: bridge
+
+volumes:
+  ssb-volume:
+  flink-volume:
+  pg-volume:
+  zk-volume:
+  kf-volume:
