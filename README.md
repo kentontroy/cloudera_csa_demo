@@ -87,6 +87,7 @@ docker-compose exec kafka /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafk
 
 ## Use SQL Stream Builder (SSB) 
 
+Kafka can serve as a Data Provider using a topic as the source for an SSB table.
 Login to the browser-based Console at port 8000.
 Wizards in SSB can automate the creation of the DDL in Flink:
 ```
@@ -146,6 +147,12 @@ curl http://localhost:18131/api/v1/query/5196/demo?key=245a51f6-2781-46b9-8db4-4
   },
   ......
 ]
+```
+## Add a Catalog for a Kudu source to create another SSB table
+
+Kudu Master
+```
+kdavis-webinar-kudu-master10.se-sandb.a465-9q4k.cloudera.site:7051
 ```
 
 <img src="./images/cloudera_materialized_view.png" alt=""/><br>
