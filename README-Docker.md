@@ -74,7 +74,7 @@ cat /etc/hosts
 # For customer-facing tests
 204.236.149.139 kafka
 ...
-```
+
 Consume a topic:
 ```
 docker-compose exec kafka /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 \
@@ -152,7 +152,7 @@ curl http://localhost:18131/api/v1/query/5196/demo?key=245a51f6-2781-46b9-8db4-4
 <img src="./images/cloudera_materialized_view.png" alt=""/><br>
 
 ```
-
+## Create a Postgres database on a separate EC2 instance
 ```
 ssh -i ${PEM_FILE} centos@3.101.105.139
 
@@ -257,20 +257,6 @@ Ensure SSB is authorized for read/write access in Ranger policies for cm_kudu.
 
 <img src="./images/SSB Add Ranger Policies.png" alt=""/><br>
 
-Add a Catalog of type Kudu in SSB <p>
-Kudu Master:
-```
-kdavis-webinar-kudu-master10.se-sandb.a465-9q4k.cloudera.site:7051
-```
-Table:
-```
-demo.demo_hurricane_metrics
-```
-<img src="./images/SSB Add Kudu Catalog.png" alt=""/><br>  
-
-The resulting table DDL in SSB
-  
-<img src="./images/SSB DDL for Kudu Table.png" alt=""/><br>  
   
 ## Use a Jupyter notebook within Cloudera CML or an independent Docker container
 If the latter, in the EC2 host where a Jupyter container is running:
