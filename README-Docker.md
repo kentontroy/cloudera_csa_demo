@@ -214,7 +214,7 @@ PRIMARY KEY (ts, county) NOT ENFORCED
   'driver'   = 'org.postgresql.Driver'
 );
 ```
-Result is:
+Result is the Materialized View
 ```
  CREATE TABLE  `ssb`.`ssb_default`.`aggregated_metrics_by_county` (
   `avg_hazard_metric` DECIMAL(38, 6),
