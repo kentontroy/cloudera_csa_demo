@@ -73,7 +73,7 @@ cat /etc/hosts
 ...
 # For customer-facing tests
 204.236.149.139 kafka
-...
+```
 
 Consume a topic:
 ```
