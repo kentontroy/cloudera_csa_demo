@@ -109,7 +109,7 @@ WITH (
   'scan.startup.mode' = 'earliest-offset'
 )
 ```
-Start a Kafka Consumer (i.e. the weather/hurricane simulator):
+Start a Kafka Producer (i.e. the weather/hurricane simulator):
 ```
 bokeh serve --show controller.py
 ```
@@ -119,13 +119,13 @@ SELECT * FROM demo_hurricane_metrics
 ;
 ```
 ## Build a Materialized View
-Create a continuous query to aggregate (by AVG) data into 10-minute intervals
+Create a continuous query to aggregate (by AVG) data into 5-minute intervals
 ```
 SELECT AVG(CAST(hazard_metric AS numeric)) AS avg_hazard_metric,
-       CAST(TUMBLE_END(eventTimestamp, interval '10' minute) AS varchar) AS ts,
+       CAST(TUMBLE_END(eventTimestamp, interval '5' minute) AS varchar) AS ts,
        us_county || ', ' || us_state AS county 
 FROM demo_hurricane_metrics
-GROUP BY us_state, us_county, TUMBLE(eventTimestamp, interval '10' minute) 
+GROUP BY us_state, us_county, TUMBLE(eventTimestamp, interval '5' minute) 
 ; 
 ```
 Build a Materialized View from the query.
@@ -149,6 +149,24 @@ curl http://localhost:18131/api/v1/query/5196/demo?key=245a51f6-2781-46b9-8db4-4
 ]
 ```
 <img src="./images/cloudera_materialized_view.png" alt=""/><br>
+
+```
+docker exec -it docker_postgresql_1 /bin/bash
+
+postgres@dd0c7d32bfc0:/$ psql
+postgres=# CREATE DATABASE demo_hurricane;
+postgres=# \c demo_hurricane
+demo_hurricane=# 
+CREATE TABLE aggregated_metrics_by_count (
+    avg_hazard_metric NUMERIC(38, 6),
+    ts VARCHAR(55),
+    county VARCHAR(80) 
+);
+demo_hurricane=# \q
+```
+```
+
+```
 
 ## Test saving the Materialized View in Kudu
 
