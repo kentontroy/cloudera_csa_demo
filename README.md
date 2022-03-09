@@ -166,7 +166,7 @@ TBLPROPERTIES (
 )
 ;
 ```
-Add a Catalog of type Kudu in SSB
+Add a Catalog of type Kudu in SSB <p>
 Kudu Master:
 ```
 kdavis-webinar-kudu-master10.se-sandb.a465-9q4k.cloudera.site:7051
