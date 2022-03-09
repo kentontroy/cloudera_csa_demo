@@ -172,6 +172,7 @@ Kudu Master:
 kdavis-webinar-kudu-master10.se-sandb.a465-9q4k.cloudera.site:7051
 ```
 Table:
+```
 demo.demo_hurricane_metrics
 ```
 
