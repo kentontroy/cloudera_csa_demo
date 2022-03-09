@@ -50,6 +50,7 @@ docker.repository.cloudera.com/csa/ssb-docker_zookeeper    1.6.0.0-ce   db44b3d5
 docker.repository.cloudera.com/csa/ssb-docker_kafka        1.6.0.0-ce   231ddba4d185   2 months ago   480MB
 docker.repository.cloudera.com/csa/ssb-docker_postgresql   1.6.0.0-ce   ecd73b2f255c   2 months ago   542MB
 ```
+
 ## Access the Streaming Console:
 ```
 http:<CSA_DOCKER_HOST>:8000/
@@ -151,21 +152,85 @@ curl http://localhost:18131/api/v1/query/5196/demo?key=245a51f6-2781-46b9-8db4-4
 <img src="./images/cloudera_materialized_view.png" alt=""/><br>
 
 ```
-docker exec -it docker_postgresql_1 /bin/bash
 
-postgres@dd0c7d32bfc0:/$ psql
+```
+ssh -i ${PEM_FILE} centos@3.101.105.139
+
+sudo yum update
+
+sudo tee /etc/yum.repos.d/pgdg.repo<<EOF
+[pgdg13]
+name=PostgreSQL 13 for RHEL/CentOS 7 - x86_64
+baseurl=https://download.postgresql.org/pub/repos/yum/13/redhat/rhel-7-x86_64
+enabled=1
+gpgcheck=0
+EOF
+
+sudo yum install postgresql13 postgresql13-server
+sudo /usr/pgsql-13/bin/postgresql-13-setup initdb
+sudo systemctl start postgresql-13
+sudo systemctl enable postgresql-13
+sudo systemctl status postgresql-13
+sudo passwd postgres
+
+su - postgres
+psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+
+psql
 postgres=# CREATE DATABASE demo_hurricane;
 postgres=# \c demo_hurricane
 demo_hurricane=# 
-CREATE TABLE aggregated_metrics_by_count (
+CREATE TABLE aggregated_metrics_by_county (
     avg_hazard_metric NUMERIC(38, 6),
-    ts VARCHAR(55),
-    county VARCHAR(80) 
-);
+    ts TIMESTAMP(3) NOT NULL,
+    county VARCHAR(80) NOT NULL,
+    PRIMARY KEY (ts, county)
+)
+;
+demo_hurricane=# CREATE USER demo WITH PASSWORD 'demo';
+demo_hurricane=# GRANT ALL PRIVILEGES ON DATABASE demo_hurricane TO demo;
 demo_hurricane=# \q
 ```
-```
 
+Type this in the SQL Console
+```
+INSERT INTO aggregated_metrics_by_county
+SELECT AVG(CAST(hazard_metric AS numeric)) AS avg_hazard_metric,
+       TUMBLE_END(eventTimestamp, interval '5' minute) AS ts,
+       us_county || ', ' || us_state AS county 
+FROM demo_hurricane_metrics
+GROUP BY us_state, us_county, TUMBLE(eventTimestamp, interval '5' minute) 
+; 
+```
+Do not hit enter                                 
+Instead, choose JDBC as a template                                       
+Add the following:
+ ```                                        
+PRIMARY KEY (ts, county) NOT ENFORCED
+  'connector' = 'jdbc',
+  'table-name' = 'aggregated_metrics_by_county', -- The name of JDBC table to connect.
+  'url' = 'jdbc:postgresql://3.101.105.139:5432/demo_hurricane',
+  'username' = 'demo',
+  'password' = 'demo',
+  'driver'   = 'org.postgresql.Driver'
+);
+```
+Result is:
+```
+ CREATE TABLE  `ssb`.`ssb_default`.`aggregated_metrics_by_county` (
+  `avg_hazard_metric` DECIMAL(38, 6),
+  `ts` TIMESTAMP(3) NOT NULL,
+  `county` VARCHAR(2147483647),
+  PRIMARY KEY (ts, county) NOT ENFORCED
+) WITH (
+  'connector' = 'jdbc',
+  'table-name' = 'aggregated_metrics_by_county', 
+  'url' = 'jdbc:postgresql://3.101.105.139:5432/demo_hurricane',
+  'username' = 'demo',
+  'password' = 'demo',
+  'driver'   = 'org.postgresql.Driver'
+);                                        
+                                         
 ```
 
 ## Test saving the Materialized View in Kudu
