@@ -184,6 +184,11 @@ Table:
 demo.demo_hurricane_metrics
 ```
 <img src="./images/SSB Add Kudu Catalog.png" alt=""/><br>  
+
+The resulting table DDL in SSB
+ 
+SSB DDL for Kudu Table
+<img src="./images/SSB DDL for Kudu Table.png" alt=""/><br>  
   
 ## Use a Jupyter notebook within Cloudera CML or an independent Docker container
 If the latter, in the EC2 host where a Jupyter container is running:
