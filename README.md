@@ -148,6 +148,8 @@ curl http://localhost:18131/api/v1/query/5196/demo?key=245a51f6-2781-46b9-8db4-4
   ......
 ]
 ```
+<img src="./images/cloudera_materialized_view.png" alt=""/><br>
+
 ## Test saving the Materialized View in Kudu
 
 Create a demo database and an Impala table stored in Kudu format using Hue.
@@ -166,6 +168,12 @@ TBLPROPERTIES (
 )
 ;
 ```
+<img src="./images/SSB Create Impala Table.png" alt=""/><br>
+
+Ensure SSB is authorized for read/write access in Ranger policies for cm_kudu.
+
+<img src="./images/SSB Add Ranger Policies.png" alt=""/><br>
+
 Add a Catalog of type Kudu in SSB <p>
 Kudu Master:
 ```
@@ -175,9 +183,8 @@ Table:
 ```
 demo.demo_hurricane_metrics
 ```
-
-<img src="./images/cloudera_materialized_view.png" alt=""/><br>
-
+<img src="./images/SSB Add Kudu Catalog.png" alt=""/><br>  
+  
 ## Use a Jupyter notebook within Cloudera CML or an independent Docker container
 If the latter, in the EC2 host where a Jupyter container is running:
 ```
