@@ -148,11 +148,31 @@ curl http://localhost:18131/api/v1/query/5196/demo?key=245a51f6-2781-46b9-8db4-4
   ......
 ]
 ```
-## Add a Catalog for a Kudu source to create another SSB table
+## Test saving the Materialized View in Kudu
 
-Kudu Master
+Create a demo database and an Impala table stored in Kudu format using Hue.
+```
+CREATE TABLE demo.demo_hurricane_metrics 
+( 
+  ts STRING NOT NULL,
+  county STRING NOT NULL,
+  avg_hazard_metric STRING NOT NULL,
+  PRIMARY KEY (ts, county)
+)
+PARTITION BY HASH(county) PARTITIONS 10
+STORED AS KUDU
+TBLPROPERTIES (
+'kudu.num_tablet_replicas' = '3'
+)
+;
+```
+Add a Catalog of type Kudu in SSB
+Kudu Master:
 ```
 kdavis-webinar-kudu-master10.se-sandb.a465-9q4k.cloudera.site:7051
+```
+Table:
+demo.demo_hurricane_metrics
 ```
 
 <img src="./images/cloudera_materialized_view.png" alt=""/><br>
