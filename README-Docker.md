@@ -179,13 +179,22 @@ psql
 postgres=# CREATE DATABASE demo_hurricane;
 postgres=# \c demo_hurricane
 demo_hurricane=# 
-CREATE TABLE aggregated_metrics_by_county (
-    avg_hazard_metric NUMERIC(38, 6),
-    ts TIMESTAMP(3) NOT NULL,
-    county VARCHAR(80) NOT NULL,
-    PRIMARY KEY (ts, county)
+CREATE TABLE sink_demo_hurricane_metrics (
+   us_state       VARCHAR(80),
+   us_county      VARCHAR(80),
+   hazard_metric  NUMERIC(38, 6),
+   eventTimestamp TIMESTAMP(3),
+   PRIMARY KEY (us_state, us_county, eventTimestamp)
 )
 ;
+demo_hurricane=# 
+CREATE TABLE aggregated_metrics_by_county
+   avg_hazard_metric NUMERIC(38, 6),
+   eventTimestamp TIMESTAMP(3),
+   county VARCHAR(80),
+   PRIMARY KEY (county, eventTimestamp)
+);
+
 demo_hurricane=# CREATE USER demo WITH PASSWORD 'demo';
 demo_hurricane=# GRANT ALL PRIVILEGES ON DATABASE demo_hurricane TO demo;
 demo_hurricane=# \q
@@ -193,21 +202,18 @@ demo_hurricane=# \q
 
 Type this in the SQL Console
 ```
-INSERT INTO aggregated_metrics_by_county
-SELECT AVG(CAST(hazard_metric AS numeric)) AS avg_hazard_metric,
-       TUMBLE_END(eventTimestamp, interval '5' minute) AS ts,
-       us_county || ', ' || us_state AS county 
+INSERT INTO sink_demo_hurricane_metrics
+SELECT *
 FROM demo_hurricane_metrics
-GROUP BY us_state, us_county, TUMBLE(eventTimestamp, interval '5' minute) 
 ; 
 ```
 Do not hit enter                                 
 Instead, choose JDBC as a template                                       
 Add the following:
  ```                                        
-PRIMARY KEY (ts, county) NOT ENFORCED
+PRIMARY KEY (us_state, us_county, eventTimestamp) NOT ENFORCED
   'connector' = 'jdbc',
-  'table-name' = 'aggregated_metrics_by_county', -- The name of JDBC table to connect.
+  'table-name' = 'sink_demo_hurricane_metrics', -- The name of JDBC table to connect.
   'url' = 'jdbc:postgresql://3.101.105.139:5432/demo_hurricane',
   'username' = 'demo',
   'password' = 'demo',
@@ -216,45 +222,49 @@ PRIMARY KEY (ts, county) NOT ENFORCED
 ```
 Result is the Materialized View
 ```
- CREATE TABLE  `ssb`.`ssb_default`.`aggregated_metrics_by_county` (
-  `avg_hazard_metric` DECIMAL(38, 6),
-  `ts` TIMESTAMP(3) NOT NULL,
-  `county` VARCHAR(2147483647),
-  PRIMARY KEY (ts, county) NOT ENFORCED
+ CREATE TABLE  `ssb`.`ssb_default`.`sink_demo_hurricane_metrics` (
+  `us_state` VARCHAR(2147483647),
+  `us_county` VARCHAR(2147483647),
+  `hazard_metric` DOUBLE,
+  `eventTimestamp` TIMESTAMP(3),
+  PRIMARY KEY (us_state, us_county, eventTimestamp) NOT ENFORCED
 ) WITH (
   'connector' = 'jdbc',
-  'table-name' = 'aggregated_metrics_by_county', 
+  'table-name' = 'sink_demo_hurricane_metrics', -- The name of JDBC table to connect.
   'url' = 'jdbc:postgresql://3.101.105.139:5432/demo_hurricane',
   'username' = 'demo',
   'password' = 'demo',
   'driver'   = 'org.postgresql.Driver'
-);                                        
+);    
                                          
 ```
+## Create reference data to join to unbounded stream
 
-## Test saving the Materialized View in Kudu
-
-Create a demo database and an Impala table stored in Kudu format using Hue.
+From Mac or Linux desktop:
 ```
-CREATE TABLE demo.demo_hurricane_metrics 
-( 
-  ts STRING NOT NULL,
-  county STRING NOT NULL,
-  avg_hazard_metric STRING NOT NULL,
-  PRIMARY KEY (ts, county)
-)
-PARTITION BY HASH(county) PARTITIONS 10
-STORED AS KUDU
-TBLPROPERTIES (
-'kudu.num_tablet_replicas' = '3'
-)
-;
+cd src
+python3 reference.py
+scp -i ${PEM_FILE} ../data/reference.csv ec2-user@${CSA_DOCKER_HOST}:/home/ec2-user
 ```
-<img src="./images/SSB Create Impala Table.png" alt=""/><br>
+Inside EC2:
+```
+[ec2-user@ip-10-0-187-219 ~]$ docker cp reference.csv ac249022cbc5:/reference.csv
+```
+Inside SQL Console:
+```
+CREATE TABLE reference_data (
+  county     STRING,
+  state      STRING,
+  centroids  STRING,
+  households INT,
+  income     INT
+) WITH (
+  'connector' = 'filesystem',           
+  'path' = 'file:///reference.csv',     
+  'format' = 'csv' 
+)
+```
 
-Ensure SSB is authorized for read/write access in Ranger policies for cm_kudu.
-
-<img src="./images/SSB Add Ranger Policies.png" alt=""/><br>
 
   
 ## Use a Jupyter notebook within Cloudera CML or an independent Docker container
