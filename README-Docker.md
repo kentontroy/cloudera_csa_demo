@@ -112,6 +112,7 @@ WITH (
 ```
 Start a Kafka Producer (i.e. the weather/hurricane simulator):
 ```
+cd src/hurricane
 bokeh serve --show controller.py
 ```
 Run a continuous query against the incoming, unbounded stream:
