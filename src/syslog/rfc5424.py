@@ -36,8 +36,8 @@ class PyOutputStreamCallback(OutputStreamCallback):
             num = random.randrange(0, 4)
             random_message = application + ' has ' + verbs[num] + ' ' + adv[num]
 
-            syslog_output = ("<{0}>{1} {2} {3} {4} {5} {6} {7} {8}\n".format(
-              priority, version, time_output, fqdn, application,random_pid, 
+            syslog_output = ('{"message": "<{0}>{1} {2} {3} {4} {5} {6} {7} {8}\n"}'.format(
+              priority, version, time_output, fqdn, application,random_pid,
               message_id,structured_data, random_message))
             outputStream.write(bytearray(syslog_output.encode('utf-8')))
 
