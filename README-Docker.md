@@ -1,7 +1,3 @@
-## High-Level Architecture for Demo
-
-<img src="./images/cloudera_ssb_skillup.png" alt=""/><br>
-
 ## Install Cloudera Streaming Analytics (CSA) via Docker Compose
 
 From Linux or Mac laptop/desktop:
@@ -56,4 +52,18 @@ docker.repository.cloudera.com/csa/ssb-docker_postgresql   1.6.0.0-ce   ecd73b2f
 http:<CSA_DOCKER_HOST>:8000/
 
 Default Credentials: admin/admin
+```
+
+## Use a Jupyter notebook within Cloudera CML or an independent Docker container
+If the latter, in the EC2 host where a Jupyter container is running:
+```
+docker exec -it jupyter /bin/bash
+jupyter server list
+...
+http://c4580d480ec3:8888/?token=98e844b1b2d750210f034b4d69440d1ff393373afd123bd6 :: /home/jovyan
+...
+
+Browse to:
+http://204.236.149.139:8888/?token=98e844b1b2d750210f034b4d69440d1ff393373afd123bd6
+
 ```
