@@ -151,121 +151,6 @@ curl http://localhost:18131/api/v1/query/5196/demo?key=245a51f6-2781-46b9-8db4-4
 ```
 <img src="./images/cloudera_materialized_view.png" alt=""/><br>
 
-## Create a Postgres database on a separate EC2 instance
-```
-ssh -i ${PEM_FILE} centos@3.101.105.139
-
-sudo yum update
-
-sudo tee /etc/yum.repos.d/pgdg.repo<<EOF
-[pgdg13]
-name=PostgreSQL 13 for RHEL/CentOS 7 - x86_64
-baseurl=https://download.postgresql.org/pub/repos/yum/13/redhat/rhel-7-x86_64
-enabled=1
-gpgcheck=0
-EOF
-
-sudo yum install postgresql13 postgresql13-server
-sudo /usr/pgsql-13/bin/postgresql-13-setup initdb
-sudo systemctl start postgresql-13
-sudo systemctl enable postgresql-13
-sudo systemctl status postgresql-13
-sudo passwd postgres
-
-su - postgres
-psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
-
-psql
-postgres=# CREATE DATABASE demo_hurricane;
-postgres=# \c demo_hurricane
-demo_hurricane=# 
-CREATE TABLE sink_demo_hurricane_metrics (
-   us_state       VARCHAR(80),
-   us_county      VARCHAR(80),
-   hazard_metric  NUMERIC(38, 6),
-   eventTimestamp TIMESTAMP(3),
-   PRIMARY KEY (us_state, us_county, eventTimestamp)
-)
-;
-demo_hurricane=# 
-CREATE TABLE aggregated_metrics_by_county
-   avg_hazard_metric NUMERIC(38, 6),
-   eventTimestamp TIMESTAMP(3),
-   county VARCHAR(80),
-   PRIMARY KEY (county, eventTimestamp)
-);
-
-demo_hurricane=# CREATE USER demo WITH PASSWORD 'demo';
-demo_hurricane=# GRANT ALL PRIVILEGES ON DATABASE demo_hurricane TO demo;
-demo_hurricane=# \q
-```
-
-Type this in the SQL Console
-```
-INSERT INTO sink_demo_hurricane_metrics
-SELECT *
-FROM demo_hurricane_metrics
-; 
-```
-Do not hit enter                                 
-Instead, choose JDBC as a template                                       
-Add the following:
- ```                                        
-PRIMARY KEY (us_state, us_county, eventTimestamp) NOT ENFORCED
-  'connector' = 'jdbc',
-  'table-name' = 'sink_demo_hurricane_metrics', -- The name of JDBC table to connect.
-  'url' = 'jdbc:postgresql://3.101.105.139:5432/demo_hurricane',
-  'username' = 'demo',
-  'password' = 'demo',
-  'driver'   = 'org.postgresql.Driver'
-);
-```
-Result is the Materialized View
-```
- CREATE TABLE  `ssb`.`ssb_default`.`sink_demo_hurricane_metrics` (
-  `us_state` VARCHAR(2147483647),
-  `us_county` VARCHAR(2147483647),
-  `hazard_metric` DOUBLE,
-  `eventTimestamp` TIMESTAMP(3),
-  PRIMARY KEY (us_state, us_county, eventTimestamp) NOT ENFORCED
-) WITH (
-  'connector' = 'jdbc',
-  'table-name' = 'sink_demo_hurricane_metrics', -- The name of JDBC table to connect.
-  'url' = 'jdbc:postgresql://3.101.105.139:5432/demo_hurricane',
-  'username' = 'demo',
-  'password' = 'demo',
-  'driver'   = 'org.postgresql.Driver'
-);    
-                                         
-```
-## Create reference data to join to unbounded stream
-
-From Mac or Linux desktop:
-```
-cd src
-python3 reference.py
-scp -i ${PEM_FILE} ../data/reference.csv ec2-user@${CSA_DOCKER_HOST}:/home/ec2-user
-```
-Inside EC2:
-```
-[ec2-user@ip-10-0-187-219 ~]$ docker cp reference.csv ac249022cbc5:/reference.csv
-```
-Inside SQL Console:
-```
-CREATE TABLE reference_data (
-  county     STRING,
-  state      STRING,
-  centroids  STRING,
-  households INT,
-  income     INT
-) WITH (
-  'connector' = 'filesystem',           
-  'path' = 'file:///reference.csv',     
-  'format' = 'csv' 
-)
-```
-
-
   
 ## Use a Jupyter notebook within Cloudera CML or an independent Docker container
 If the latter, in the EC2 host where a Jupyter container is running:
@@ -280,7 +165,6 @@ Browse to:
 http://204.236.149.139:8888/?token=98e844b1b2d750210f034b4d69440d1ff393373afd123bd6
 
 ```
-
 
 ## Install Go for use with Apache Beam and the Flink Runner
 ```
