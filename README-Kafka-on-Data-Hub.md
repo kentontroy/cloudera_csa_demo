@@ -28,6 +28,12 @@ kafka-console-producer \
   --producer.config jaas.conf \
   --topic ${KAFKA_TOPIC} \
   < file_stream.txt
+  
+kafka-console-consumer \
+  --bootstrap-server ${KAFKA_SERVER_1},${KAFKA_SERVER_2} \
+  --consumer.config jaas.conf \
+  --topic ${KAFKA_TOPIC} \
+  --from-beginning
 ```
 
 Kafka schema
